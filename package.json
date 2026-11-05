@@ -1,0 +1,32 @@
+{
+  "name": "livelatex-cli",
+  "version": "0.2.0",
+  "description": "Command-line interface for the LiveLaTeX compilation library.",
+  "author": "Andrei Durlea",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AndreiDurlea/live-latex-cli.git"
+  },
+  "bin": {
+    "livelatex": "bin/livelatex.js"
+  },
+  "files": [
+    "bin",
+    "dist"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsc -p .",
+    "prepare": "tsc -p .",
+    "test": "tsc -p . && node --test test/cli.test.js"
+  },
+  "dependencies": {
+    "livelatex": "git+https://github.com/AndreiDurlea/live-latex.git"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "typescript": "^5.9.0"
+  }
+}
