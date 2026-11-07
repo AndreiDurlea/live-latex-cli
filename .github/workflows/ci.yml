@@ -37,6 +37,9 @@ jobs:
           export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/livelatex_deploy_key -o IdentitiesOnly=yes"
           git config --global url."ssh://git@github.com/AndreiDurlea/live-latex".insteadOf "https://github.com/AndreiDurlea/live-latex"
           git ls-remote ssh://git@github.com/AndreiDurlea/live-latex.git HEAD
+          # npm runs `git submodule update --init --recursive` on git dependencies; the core's
+          # submodules (cli, extension, quickstart) are not needed to build it and the key cannot read them.
+          for m in cli extension quickstart; do git config --global submodule.$m.update none; done
       - name: Fetch GitHub dependencies over HTTPS
         if: env.HAS_DEPLOY_KEY != 'true'
         run: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
