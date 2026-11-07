@@ -14,6 +14,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
     env:
+      HAS_DEPLOY_KEY: ${{ secrets.LIVELATEX_DEPLOY_KEY != '' }}
       LIVELATEX_TEST_TECTONIC: "1"
     steps:
       - uses: actions/checkout@v4
@@ -21,14 +22,13 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Read the private livelatex core with its deploy key
+        if: env.HAS_DEPLOY_KEY == 'true'
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.LIVELATEX_DEPLOY_KEY }}
       - name: Fetch GitHub dependencies over HTTPS
-        shell: bash
-        env:
-          LIVELATEX_TOKEN: ${{ secrets.LIVELATEX_TOKEN }}
-        run: |
-          prefix="https://github.com/"
-          if [ -n "$LIVELATEX_TOKEN" ]; then prefix="https://x-access-token:${LIVELATEX_TOKEN}@github.com/"; fi
-          git config --global url."$prefix".insteadOf "ssh://git@github.com/"
-          git config --global --add url."$prefix".insteadOf "https://github.com/"
+        if: env.HAS_DEPLOY_KEY != 'true'
+        run: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
       - run: npm ci
       - run: npm test
