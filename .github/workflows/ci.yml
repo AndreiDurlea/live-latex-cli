@@ -24,9 +24,17 @@ jobs:
           cache: npm
       - name: Read the private livelatex core with its deploy key
         if: env.HAS_DEPLOY_KEY == 'true'
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_KEY_ANDREIDURLEA__LIVE_LATEX_6782B5 }}
+        shell: bash
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY_ANDREIDURLEA__LIVE_LATEX_6782B5 }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/livelatex_deploy_key
+          chmod 600 ~/.ssh/livelatex_deploy_key
+          ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+          git config --global core.sshCommand "ssh -i ~/.ssh/livelatex_deploy_key -o IdentitiesOnly=yes"
+          git config --global url."ssh://git@github.com/AndreiDurlea/live-latex".insteadOf "https://github.com/AndreiDurlea/live-latex"
+          git ls-remote ssh://git@github.com/AndreiDurlea/live-latex.git HEAD
       - name: Fetch GitHub dependencies over HTTPS
         if: env.HAS_DEPLOY_KEY != 'true'
         run: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
