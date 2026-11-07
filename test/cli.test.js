@@ -30,9 +30,18 @@ test("serve answers hello over stdio", () => {
   assert.equal(reply.result.protocol, 1);
 });
 
-test("init from live-latex-quickstart and build with Tectonic", { skip: !process.env.LIVELATEX_TEST_TECTONIC && "set LIVELATEX_TEST_TECTONIC=1", timeout: 600000 }, () => {
-  const dir = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "livelatex-cli-")), "paper");
-  const init = spawnSync(process.execPath, [bin, "init", dir], { encoding: "utf8" });
+test("init from a template and build with Tectonic", { skip: !process.env.LIVELATEX_TEST_TECTONIC && "set LIVELATEX_TEST_TECTONIC=1", timeout: 600000 }, () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "livelatex-cli-"));
+  // A local template keeps the test independent of GitHub access; LIVELATEX_TEST_TEMPLATE selects
+  // another source, e.g. "quickstart" once the quickstart repository is readable.
+  let template = process.env.LIVELATEX_TEST_TEMPLATE;
+  if (!template) {
+    template = path.join(root, "template");
+    fs.mkdirSync(template);
+    fs.writeFileSync(path.join(template, "main.tex"), "\\documentclass{article}\n\\begin{document}\nHello, Live LaTeX.\n\\end{document}\n");
+  }
+  const dir = path.join(root, "paper");
+  const init = spawnSync(process.execPath, [bin, "init", dir, "--template", template], { encoding: "utf8" });
   assert.equal(init.status, 0, init.stderr);
   const build = spawnSync(process.execPath, [bin, "build", dir, "--engine", "tectonic"], { encoding: "utf8" });
   assert.equal(build.status, 0, build.stdout + build.stderr);
