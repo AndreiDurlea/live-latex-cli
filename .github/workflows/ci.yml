@@ -32,7 +32,9 @@ jobs:
           printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/livelatex_deploy_key
           chmod 600 ~/.ssh/livelatex_deploy_key
           ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
-          git config --global core.sshCommand "ssh -i ~/.ssh/livelatex_deploy_key -o IdentitiesOnly=yes"
+          # npm sets its own GIT_SSH_COMMAND when none is present, which would override core.sshCommand.
+          echo "GIT_SSH_COMMAND=ssh -i $HOME/.ssh/livelatex_deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new" >> "$GITHUB_ENV"
+          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/livelatex_deploy_key -o IdentitiesOnly=yes"
           git config --global url."ssh://git@github.com/AndreiDurlea/live-latex".insteadOf "https://github.com/AndreiDurlea/live-latex"
           git ls-remote ssh://git@github.com/AndreiDurlea/live-latex.git HEAD
       - name: Fetch GitHub dependencies over HTTPS
