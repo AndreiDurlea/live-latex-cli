@@ -22,6 +22,13 @@ jobs:
           node-version: 22
           cache: npm
       - name: Fetch GitHub dependencies over HTTPS
-        run: git config --global url."https://github.com/".insteadOf "ssh://git@github.com/"
+        shell: bash
+        env:
+          LIVELATEX_TOKEN: ${{ secrets.LIVELATEX_TOKEN }}
+        run: |
+          prefix="https://github.com/"
+          if [ -n "$LIVELATEX_TOKEN" ]; then prefix="https://x-access-token:${LIVELATEX_TOKEN}@github.com/"; fi
+          git config --global url."$prefix".insteadOf "ssh://git@github.com/"
+          git config --global --add url."$prefix".insteadOf "https://github.com/"
       - run: npm ci
       - run: npm test
